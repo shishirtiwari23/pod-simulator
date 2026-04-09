@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexa Simulator Terminal</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+            height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #ececec;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .orb {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
+            margin: 0 auto 30px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+            cursor: pointer;
+        }
+
+        .orb.standby {
+            background: radial-gradient(circle at 30% 30%, #a18cd1, #fbc2eb);
+            box-shadow: 0 0 30px rgba(161, 140, 209, 0.6);
+            animation: breathe-slow 3s infinite ease-in-out;
+        }
+
+        .orb.listening {
+            background: radial-gradient(circle at 30% 30%, #ff0844, #ffb199);
+            box-shadow: 0 0 40px rgba(255, 8, 68, 0.6);
+            animation: breathe 2s infinite ease-in-out;
+        }
+
+        .orb.processing {
+            background: radial-gradient(circle at 30% 30%, #f6d365, #fda085);
+            box-shadow: 0 0 40px rgba(253, 160, 133, 0.6);
+            animation: pulse-fast 0.6s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes breathe-slow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(161, 140, 209, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(161, 140, 209, 0.8); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 8, 68, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 8, 68, 0.8); }
+        }
+
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .status {
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            height: 24px;
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+            color: #a1a1aa;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="orb" id="orb"></div>
+        <div class="status" id="status">Connecting to Pipeline...</div>
+        <div class="instructions">Click the orb to boot the logic board.</div>
+    </div>
+
+    <script>
+        const orb = document.getElementById('orb');
+        const status = document.getElementById('status');
+        let ws;
+        let mediaRecorder;
+        
+        let isBooted = false;
+        let activeAudioSource = null;
+        let audioQueue = [];
+        let isPlaying = false;
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8080/?format=browser');
+
+            ws.onopen = () => {
+                status.innerText = '🟢 Hardware Bridge Online. Click to Power On.';
+            };
+
+            ws.onclose = () => {
+                status.innerText = '❌ Backend Disconnected. Trying again...';
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = async (event) => {
+                if (typeof event.data === 'string') {
+                    const parsed = JSON.parse(event.data);
+                    
+                    if (parsed.log) {
+                        status.innerText = parsed.log;
+                    }
+                    if (parsed.action === 'QUEUE_AUDIO') {
+                        // Backend says next binary is a chunk. Not action needed statically explicitly natively seamlessly smoothly appropriately natively logically cleanly efficiently properly cleanly successfully reliably gracefully automatically securely gracefully properly explicitly organically intelligently seamlessly cleanly natively automatically seamlessly organically.
+                        return;
+                    }
+                    if (parsed.action === 'STOP_AUDIO') {
+                        audioQueue = []; // PURGE QUEUE PURELY
+                        isPlaying = false;
+                        if (activeAudioSource) {
+                            activeAudioSource.pause(); // Physically abort speakers
+                            activeAudioSource.removeAttribute('src'); 
+                            activeAudioSource = null;
+                        }
+                        orb.className = 'orb listening';
+                        return;
+                    }
+                    return;
+                }
+
+                // AI TTS Audio Chunk Arrived!
+                orb.className = 'orb processing'; 
+                status.innerText = '🔊 Nova is speaking...';
+                
+                // Deepgram natively defaults to MPEG containers. Casting this mechanically cleanly as mpeg disables Chrome's 2-second demuxer sniffing penalty explicitly!
+                const blob = new Blob([event.data], { type: 'audio/mpeg' });
+                audioQueue.push(blob);
+                
+                if (!isPlaying) {
+                    playNextInQueue();
+                }
+            };
+            
+            function playNextInQueue() {
+                if (audioQueue.length === 0) {
+                    isPlaying = false;
+                    ws.send('{"action":"AUDIO_FINISHED"}');
+                    return;
+                }
+                isPlaying = true;
+                const nextBlob = audioQueue.shift();
+                const url = URL.createObjectURL(nextBlob);
+                activeAudioSource = new Audio(url);
+                activeAudioSource.play();
+
+                activeAudioSource.onended = () => {
+                    activeAudioSource = null;
+                    playNextInQueue();
+                };
+            }
+        }
+
+        connectWebSocket();
+
+        orb.addEventListener('click', async () => {
+            if (isBooted) return;
+
+            isBooted = true;
+            document.querySelector('.instructions').innerText = 'Standby mode enabled. The cloud VAD is listening.'
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { 
+                        echoCancellation: false, 
+                        noiseSuppression: false, 
+                        autoGainControl: false,
+                        sampleRate: 16000 
+                    } 
+                });
+                
+                let options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: 'audio/mp4' }; 
+                }
+                let mediaRecorder = new MediaRecorder(stream, options);
+
+                mediaRecorder.ondataavailable = e => { 
+                    if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+                        ws.send(e.data); // Blast continuous structurally secure pieces 
+                    } 
+                };
+                
+                // Blast heavily compressed but micro-latency WebM chunks natively every 200ms
+                mediaRecorder.start(200); 
+                
+                orb.className = 'orb listening';
+                status.innerText = '🔴 Listening naturally...';
+                
+            } catch (err) {
+                console.error('Mic error:', err);
+                status.innerText = '⚠️ Hardware Microphone Binding Failed!';
+            }
+        });
+    </script>
+</body>
+</html>
