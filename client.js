@@ -11,8 +11,7 @@ const ws = new WebSocket('ws://localhost:8080');
 let isRecording = false;
 let isProcessing = false;
 let recordProcess = null;
-const AUDIO_FILE = path.join(__dirname, 'temp_audio.wav');
-const OUT_FILE = path.join(__dirname, 'ai_response.wav');
+let playProcess = null;
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
@@ -78,6 +77,16 @@ ws.on('message', (data, isBinary) => {
             const parsed = JSON.parse(data.toString());
             if (parsed.log) console.log(`   ${parsed.log}`);
 
+            if (parsed.action === 'STOP_AUDIO') {
+                if (playProcess) {
+                    playProcess.kill('SIGKILL');
+                    playProcess = null;
+                }
+                isProcessing = false;
+                console.log('\n🛑 STOP_AUDIO RECEIVED. Silencing Output.');
+                return;
+            }
+
             // --- THE EXPLICIT HARDWARE SLEEP COMMAND ---
             if (parsed.action === 'SLEEP') {
                 if (recordProcess) {
@@ -88,27 +97,41 @@ ws.on('message', (data, isBinary) => {
                 console.log('\n💤 SLEEP COMMAND RECEIVED. Hardware Microphone physically powered down.');
                 console.log('   (Press [ENTER] to simulate Wake Word...)');
             }
+
+            if (parsed.action === 'TTS_STREAM_CLOSED') {
+                if (playProcess && playProcess.stdin) {
+                     playProcess.stdin.end(); // Safely closes the hardware pipeline so `on('close')` fires correctly!
+                }
+            }
         } catch(e) {}
         return;
     }
 
-    console.log('\n🔈 AI replying natively...');
-    fs.writeFileSync(OUT_FILE, data);
-    
-    // Natively execute macOS framework audio to completely bypass buffer underflow
-    const playProc = spawn('afplay', [OUT_FILE]);
-    
-    playProc.on('close', () => {
-         isProcessing = false; // Unlock the pipeline for the next human input
-         if (ws.readyState === WebSocket.OPEN) {
-             // Hardware signal that physical speakers are mechanically done
-             ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
-         }
-         
-         try {
-             if (fs.existsSync(OUT_FILE)) fs.unlinkSync(OUT_FILE);
-         } catch(cleanupErr) {}
-    });
+    if (!playProcess) {
+        console.log('\n🔈 AI replying natively via high-speed PCM pipeline...');
+        isProcessing = true;
+        // Launch a persistent `play` process expecting raw 16-bit 24kHz mono PCM on stdin
+        playProcess = spawn('play', ['-q', '-t', 'raw', '-r', '24000', '-e', 'signed', '-b', '16', '-c', '1', '-']);
+        
+        playProcess.on('close', () => {
+             isProcessing = false; // Unlock pipeline
+             playProcess = null;
+             if (ws.readyState === WebSocket.OPEN) {
+                 ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
+             }
+        });
+
+        playProcess.stderr.on('data', (err) => {
+            if (!err.toString().includes('play')) {
+                console.error(`[Play Error]: ${err.toString()}`);
+            }
+        });
+    }
+
+    // Pipe the raw PCM data immediately to existing active hardware stream
+    if (playProcess && playProcess.stdin.writable) {
+        playProcess.stdin.write(data);
+    }
 });
 
 ws.on('close', () => {

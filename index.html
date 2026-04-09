@@ -1,119 +1,324 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alexa Simulator Terminal</title>
+    <title>Pod - Advanced Voice Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root[data-theme="light"] {
+            --bg-color: #f7f7f9;
+            --bg-gradient: radial-gradient(circle at center, #ffffff 0%, var(--bg-color) 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --orb-shadow: rgba(0,0,0,0.1);
+            --container-shadow: 0 30px 60px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+            --theme-toggle-bg: #e5e7eb;
+            --theme-toggle-fg: #111827;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #050505;
+            --bg-gradient: radial-gradient(circle at center, #1a1a24 0%, var(--bg-color) 100%);
+            --glass-bg: rgba(25, 25, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --orb-shadow: rgba(0,0,0,0.6);
+            --container-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            --theme-toggle-bg: #374151;
+            --theme-toggle-fg: #f3f4f6;
+        }
+
         body {
             margin: 0; padding: 0;
-            background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+            background: var(--bg-gradient);
             height: 100vh;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             font-family: 'Inter', system-ui, sans-serif;
-            color: #ececec;
+            color: var(--text-primary);
             overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
         }
+
+        /* Top Bar UI */
+        .header-bar {
+            position: absolute;
+            top: 30px; right: 40px;
+            display: flex; gap: 15px;
+        }
+
+        .theme-toggle {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--theme-toggle-bg);
+            color: var(--theme-toggle-fg);
+            border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.05); }
 
         .container {
             text-align: center;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px 60px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 60px 80px;
+            border-radius: 40px;
+            box-shadow: var(--container-shadow);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            max-width: 550px;
+            width: 90%;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        /* 3D Premium Orb Subsystem */
+        .orb-wrapper {
+            position: relative;
+            width: 200px; height: 200px;
+            margin: 0 auto 50px;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .orb {
             width: 120px; height: 120px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
-            margin: 0 auto 30px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: pointer;
+            position: relative;
+            z-index: 5;
         }
 
-        .orb.standby {
-            background: radial-gradient(circle at 30% 30%, #a18cd1, #fbc2eb);
-            box-shadow: 0 0 30px rgba(161, 140, 209, 0.6);
-            animation: breathe-slow 3s infinite ease-in-out;
-        }
-
-        .orb.listening {
-            background: radial-gradient(circle at 30% 30%, #ff0844, #ffb199);
-            box-shadow: 0 0 40px rgba(255, 8, 68, 0.6);
-            animation: breathe 2s infinite ease-in-out;
-        }
-
-        .orb.processing {
-            background: radial-gradient(circle at 30% 30%, #f6d365, #fda085);
-            box-shadow: 0 0 40px rgba(253, 160, 133, 0.6);
-            animation: pulse-fast 0.6s infinite ease-in-out;
+        .orb::after {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 50%;
+            box-shadow: inset 0 0 25px rgba(255,255,255,0.6);
+            z-index: 6;
             pointer-events: none;
         }
 
-        @keyframes breathe-slow {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(161, 140, 209, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(161, 140, 209, 0.8); }
+        /* Multilayered Concentric Rings */
+        .ring {
+            position: absolute;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            z-index: 1;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .ring-1 { width: 140px; height: 140px; border-width: 1px; }
+        .ring-2 { width: 170px; height: 170px; border-width: 1px; border-style: dashed; }
+        .ring-3 { width: 200px; height: 200px; border-width: 2px; }
+
+        /* --- Ambient States --- */
+
+        /* 1. Standby */
+        .orb.standby {
+            background: linear-gradient(135deg, #a5b4fc, #818cf8);
+            box-shadow: 0 10px 40px rgba(129, 140, 248, 0.4), inset -10px -10px 30px var(--orb-shadow);
+            animation: float 5s infinite ease-in-out;
         }
 
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 8, 68, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 8, 68, 0.8); }
+        /* 2. Listening */
+        .orb.listening {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            box-shadow: 0 10px 50px rgba(16, 185, 129, 0.5), inset -10px -10px 30px var(--orb-shadow);
+            animation: breathe-fast 1.8s infinite ease-in-out;
+            transform: scale(1.05);
+        }
+        .listening ~ .ring { border-color: rgba(16, 185, 129, 0.3); opacity: 1; }
+        .listening ~ .ring-1 { animation: expand 2s infinite ease-out; }
+        .listening ~ .ring-2 { animation: expand 2.5s infinite ease-out 0.2s; }
+        .listening ~ .ring-3 { animation: expand 3s infinite ease-out 0.4s; }
+
+        /* 3. Processing */
+        .orb.processing {
+            background: linear-gradient(135deg, #fcd34d, #f59e0b);
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.5), inset -10px -10px 30px var(--orb-shadow);
+            pointer-events: none;
+        }
+        .processing ~ .ring { border-color: rgba(245, 158, 11, 0.4); opacity: 1; }
+        .processing ~ .ring-1 { animation: spin-clockwise 2s infinite linear; }
+        .processing ~ .ring-2 { animation: spin-counter 3s infinite linear; }
+        .processing ~ .ring-3 { border: 2px solid transparent; border-top-color: rgba(245, 158, 11, 0.6); animation: spin-clockwise 1s infinite cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+
+        /* 4. Speaking */
+        .orb.speaking {
+            background: linear-gradient(135deg, #f472b6, #db2777);
+            box-shadow: 0 10px 60px rgba(219, 39, 119, 0.6), inset -10px -10px 30px var(--orb-shadow);
+            animation: snap 0.6s infinite alternate cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .speaking ~ .ring { border-color: rgba(219, 39, 119, 0.5); opacity: 1; }
+        .speaking ~ .ring-1 { animation: ripple 0.8s infinite ease-out; }
+        .speaking ~ .ring-2 { animation: ripple 1.2s infinite ease-out 0.1s; }
+        .speaking ~ .ring-3 { animation: ripple 1.6s infinite ease-out 0.2s; }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(0.98); }
+        }
+        @keyframes breathe-fast {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.12); box-shadow: 0 0 70px rgba(16,185,129,0.7); }
+        }
+        @keyframes expand {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        @keyframes spin-clockwise { 100% { transform: rotate(360deg); } }
+        @keyframes spin-counter { 100% { transform: rotate(-360deg); } }
+        @keyframes snap {
+            0% { transform: scale(1.0); border-radius: 50%; }
+            100% { transform: scale(1.15); border-radius: 45%; }
+        }
+        @keyframes ripple {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 0; }
         }
 
-        @keyframes pulse-fast {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(0.95); opacity: 0.8; }
-        }
-
+        /* Typography */
         .status {
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             font-weight: 500;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            height: 24px;
+            letter-spacing: -0.01em;
+            margin-bottom: 20px;
+            min-height: 32px;
+        }
+
+        .transcript {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
 
         .instructions {
-            font-size: 0.85rem;
-            color: #a1a1aa;
-            margin-top: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            opacity: 0.6;
         }
 
     </style>
 </head>
 <body>
 
+    <div class="header-bar">
+        <button class="theme-toggle" id="themeBtn">🌙</button>
+    </div>
+
     <div class="container">
-        <div class="orb" id="orb"></div>
-        <div class="status" id="status">Connecting to Pipeline...</div>
-        <div class="instructions">Click the orb to boot the logic board.</div>
+        <div class="orb-wrapper">
+            <div class="orb standby" id="orb"></div>
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+        </div>
+        <div class="status" id="status">Connecting to Core...</div>
+        <div class="transcript" id="transcript"></div>
+        <div class="instructions" id="inst">Tap orb to initialize system</div>
     </div>
 
     <script>
+        const themeBtn = document.getElementById('themeBtn');
         const orb = document.getElementById('orb');
         const status = document.getElementById('status');
+        const transcript = document.getElementById('transcript');
+        const inst = document.getElementById('inst');
         let ws;
-        let mediaRecorder;
-        
         let isBooted = false;
-        let activeAudioSource = null;
-        let audioQueue = [];
+
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeBtn.innerText = newTheme === 'light' ? '🌤' : '🌙';
+        });
+        
+        // Audio playback state
+        let audioCtx = null;
+        let nextPlayTime = 0;
         let isPlaying = false;
+        let endOfStream = false;
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        let activeSources = 0;
+        function schedulePCMChunk(arrayBuffer) {
+            ensureAudioContext();
+            
+            // Raw linear16 to Float32 conversion
+            const int16Data = new Int16Array(arrayBuffer);
+            const audioBuffer = audioCtx.createBuffer(1, int16Data.length, 24000);
+            const channelData = audioBuffer.getChannelData(0);
+            
+            for (let i = 0; i < int16Data.length; i++) {
+                channelData[i] = int16Data[i] / 32768.0;
+            }
+            
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioCtx.destination);
+            
+            // Queue seamlessly
+            if (nextPlayTime < audioCtx.currentTime) {
+                nextPlayTime = audioCtx.currentTime + 0.01; // small bump
+            }
+            
+            source.start(nextPlayTime);
+            nextPlayTime += audioBuffer.duration;
+            
+            isPlaying = true;
+            activeSources++;
+            
+            source.onended = () => {
+                activeSources--;
+                if (activeSources === 0 && endOfStream) {
+                    isPlaying = false;
+                    orb.className = 'orb listening';
+                    status.innerText = 'Listening...';
+                    ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
+                }
+            };
+        }
 
         function connectWebSocket() {
             ws = new WebSocket('ws://localhost:8080/?format=browser');
 
             ws.onopen = () => {
-                status.innerText = '🟢 Hardware Bridge Online. Click to Power On.';
+                status.innerText = 'System Ready';
+                transcript.innerText = 'Awaiting boot sequence';
             };
 
             ws.onclose = () => {
-                status.innerText = '❌ Backend Disconnected. Trying again...';
+                status.innerText = 'Connection Lost';
+                orb.className = 'orb processing'; // reuse animation for error
+                orb.style.background = 'radial-gradient(circle at 30% 30%, #ef4444, #7f1d1d)';
                 setTimeout(connectWebSocket, 3000);
             };
 
@@ -122,72 +327,79 @@
                     const parsed = JSON.parse(event.data);
                     
                     if (parsed.log) {
-                        status.innerText = parsed.log;
+                        if (parsed.log.includes('Hearing:')) {
+                            transcript.innerText = parsed.log.replace('👂 Hearing:', '').trim().replace(/"/g, '');
+                        } else {
+                            status.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
+                        }
                     }
                     if (parsed.action === 'QUEUE_AUDIO') {
-                        // Backend says next binary is a chunk. Not action needed statically explicitly natively seamlessly smoothly appropriately natively logically cleanly efficiently properly cleanly successfully reliably gracefully automatically securely gracefully properly explicitly organically intelligently seamlessly cleanly natively automatically seamlessly organically.
+                        orb.className = 'orb processing'; // Will transition to playing
+                        status.innerText = 'Synthesizing...';
+                        return;
+                    }
+                    if (parsed.action === 'TTS_STREAM_START') {
+                        endOfStream = false;
+                        if (parsed.log) {
+                            status.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
+                        }
+                        return;
+                    }
+                    if (parsed.action === 'TTS_STREAM_CLOSED') {
+                        endOfStream = true;
+                        if (activeSources === 0) {
+                            isPlaying = false;
+                            orb.className = 'orb listening';
+                            status.innerText = 'Listening...';
+                            ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
+                        }
                         return;
                     }
                     if (parsed.action === 'STOP_AUDIO') {
-                        audioQueue = []; // PURGE QUEUE PURELY
-                        isPlaying = false;
-                        if (activeAudioSource) {
-                            activeAudioSource.pause(); // Physically abort speakers
-                            activeAudioSource.removeAttribute('src'); 
-                            activeAudioSource = null;
+                        // Purge playback 
+                        if (audioCtx) {
+                            audioCtx.close();
+                            audioCtx = null;
+                            nextPlayTime = 0;
+                            activeSources = 0;
+                            endOfStream = false;
                         }
+                        isPlaying = false;
                         orb.className = 'orb listening';
+                        status.innerText = 'Listening...';
+                        transcript.innerText = 'Interrupted.';
                         return;
                     }
                     return;
                 }
 
-                // AI TTS Audio Chunk Arrived!
-                orb.className = 'orb processing'; 
-                status.innerText = '🔊 Nova is speaking...';
+                // AI TTS Audio PCM Chunk Arrived!
+                orb.className = 'orb speaking'; 
+                status.innerText = 'Speaking...';
                 
-                // Deepgram natively defaults to MPEG containers. Casting this mechanically cleanly as mpeg disables Chrome's 2-second demuxer sniffing penalty explicitly!
-                const blob = new Blob([event.data], { type: 'audio/mpeg' });
-                audioQueue.push(blob);
-                
-                if (!isPlaying) {
-                    playNextInQueue();
-                }
+                // Decode WebSockets blob to ArrayBuffer
+                const arrayBuffer = await event.data.arrayBuffer();
+                schedulePCMChunk(arrayBuffer);
             };
-            
-            function playNextInQueue() {
-                if (audioQueue.length === 0) {
-                    isPlaying = false;
-                    ws.send('{"action":"AUDIO_FINISHED"}');
-                    return;
-                }
-                isPlaying = true;
-                const nextBlob = audioQueue.shift();
-                const url = URL.createObjectURL(nextBlob);
-                activeAudioSource = new Audio(url);
-                activeAudioSource.play();
-
-                activeAudioSource.onended = () => {
-                    activeAudioSource = null;
-                    playNextInQueue();
-                };
-            }
         }
 
         connectWebSocket();
 
         orb.addEventListener('click', async () => {
             if (isBooted) return;
-
             isBooted = true;
-            document.querySelector('.instructions').innerText = 'Standby mode enabled. The cloud VAD is listening.'
+            
+            // Required for Apple / Webkit Audio policies
+            ensureAudioContext();
+            
+            inst.innerText = 'Voice pipeline active';
             
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: { 
-                        echoCancellation: false, 
-                        noiseSuppression: false, 
-                        autoGainControl: false,
+                        echoCancellation: true, 
+                        noiseSuppression: true, 
+                        autoGainControl: true,
                         sampleRate: 16000 
                     } 
                 });
@@ -196,23 +408,23 @@
                 if (!MediaRecorder.isTypeSupported(options.mimeType)) {
                     options = { mimeType: 'audio/mp4' }; 
                 }
-                let mediaRecorder = new MediaRecorder(stream, options);
+                const mediaRecorder = new MediaRecorder(stream, options);
 
                 mediaRecorder.ondataavailable = e => { 
                     if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
-                        ws.send(e.data); // Blast continuous structurally secure pieces 
+                        ws.send(e.data);
                     } 
                 };
                 
-                // Blast heavily compressed but micro-latency WebM chunks natively every 200ms
                 mediaRecorder.start(200); 
                 
                 orb.className = 'orb listening';
-                status.innerText = '🔴 Listening naturally...';
+                status.innerText = 'Listening...';
+                transcript.innerText = 'Speak naturally...';
                 
             } catch (err) {
                 console.error('Mic error:', err);
-                status.innerText = '⚠️ Hardware Microphone Binding Failed!';
+                status.innerText = 'Microphone Access Denied';
             }
         });
     </script>
