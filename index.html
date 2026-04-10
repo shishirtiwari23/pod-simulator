@@ -3,276 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pod - Advanced Voice Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Pod - True Semantic Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root[data-theme="light"] {
-            --bg-color: #f7f7f9;
-            --bg-gradient: radial-gradient(circle at center, #ffffff 0%, var(--bg-color) 100%);
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(0, 0, 0, 0.05);
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --orb-shadow: rgba(0,0,0,0.1);
-            --container-shadow: 0 30px 60px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
-            --theme-toggle-bg: #e5e7eb;
-            --theme-toggle-fg: #111827;
+        :root {
+            --bg-color: #000000;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --gradient-stop-1: #1e1b4b;
+            --gradient-stop-2: #05051a;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --glass-bg: rgba(20, 20, 25, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --orb-glow: #3b82f6;
+            --orb-size: 140px;
         }
 
-        :root[data-theme="dark"] {
-            --bg-color: #050505;
-            --bg-gradient: radial-gradient(circle at center, #1a1a24 0%, var(--bg-color) 100%);
-            --glass-bg: rgba(25, 25, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --orb-shadow: rgba(0,0,0,0.6);
-            --container-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-            --theme-toggle-bg: #374151;
-            --theme-toggle-fg: #f3f4f6;
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
         }
 
         body {
-            margin: 0; padding: 0;
-            background: var(--bg-gradient);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, var(--gradient-stop-1), var(--gradient-stop-2) 60%);
             height: 100vh;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Outfit', sans-serif;
             color: var(--text-primary);
             overflow: hidden;
-            transition: background 0.5s ease, color 0.5s ease;
         }
 
-        /* Top Bar UI */
-        .header-bar {
+        /* Abstract Dynamic Background Elements */
+        .ambient-blur {
             position: absolute;
-            top: 30px; right: 40px;
-            display: flex; gap: 15px;
-        }
-
-        .theme-toggle {
-            width: 44px; height: 44px;
+            width: 600px;
+            height: 600px;
+            background: var(--accent-glow);
+            filter: blur(140px);
+            opacity: 0.4;
             border-radius: 50%;
-            background: var(--theme-toggle-bg);
-            color: var(--theme-toggle-fg);
-            border: 1px solid var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 1.1rem;
-            transition: all 0.3s ease;
+            z-index: 0;
+            animation: drift 10s infinite alternate ease-in-out;
+            pointer-events: none;
         }
-        .theme-toggle:hover { transform: scale(1.05); }
 
+        /* Modern Glassmorphic Container */
         .container {
-            text-align: center;
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 600px;
+            padding: 60px 40px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            padding: 60px 80px;
-            border-radius: 40px;
-            box-shadow: var(--container-shadow);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            max-width: 550px;
-            width: 90%;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
+            border-radius: 36px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* 3D Premium Orb Subsystem */
+        /* 2026 Orb Core */
         .orb-wrapper {
             position: relative;
-            width: 200px; height: 200px;
-            margin: 0 auto 50px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .orb {
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            cursor: pointer;
-            position: relative;
-            z-index: 5;
-        }
-
-        .orb::after {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            border-radius: 50%;
-            box-shadow: inset 0 0 25px rgba(255,255,255,0.6);
-            z-index: 6;
-            pointer-events: none;
-        }
-
-        /* Multilayered Concentric Rings */
-        .ring {
-            position: absolute;
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            border: 1px solid transparent;
-            z-index: 1;
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
-        .ring-1 { width: 140px; height: 140px; border-width: 1px; }
-        .ring-2 { width: 170px; height: 170px; border-width: 1px; border-style: dashed; }
-        .ring-3 { width: 200px; height: 200px; border-width: 2px; }
-
-        /* --- Ambient States --- */
-
-        /* 1. Standby */
-        .orb.standby {
-            background: linear-gradient(135deg, #a5b4fc, #818cf8);
-            box-shadow: 0 10px 40px rgba(129, 140, 248, 0.4), inset -10px -10px 30px var(--orb-shadow);
-            animation: float 5s infinite ease-in-out;
-        }
-
-        /* 2. Listening */
-        .orb.listening {
-            background: linear-gradient(135deg, #34d399, #10b981);
-            box-shadow: 0 10px 50px rgba(16, 185, 129, 0.5), inset -10px -10px 30px var(--orb-shadow);
-            animation: breathe-fast 1.8s infinite ease-in-out;
-            transform: scale(1.05);
-        }
-        .listening ~ .ring { border-color: rgba(16, 185, 129, 0.3); opacity: 1; }
-        .listening ~ .ring-1 { animation: expand 2s infinite ease-out; }
-        .listening ~ .ring-2 { animation: expand 2.5s infinite ease-out 0.2s; }
-        .listening ~ .ring-3 { animation: expand 3s infinite ease-out 0.4s; }
-
-        /* 3. Processing */
-        .orb.processing {
-            background: linear-gradient(135deg, #fcd34d, #f59e0b);
-            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.5), inset -10px -10px 30px var(--orb-shadow);
-            pointer-events: none;
-        }
-        .processing ~ .ring { border-color: rgba(245, 158, 11, 0.4); opacity: 1; }
-        .processing ~ .ring-1 { animation: spin-clockwise 2s infinite linear; }
-        .processing ~ .ring-2 { animation: spin-counter 3s infinite linear; }
-        .processing ~ .ring-3 { border: 2px solid transparent; border-top-color: rgba(245, 158, 11, 0.6); animation: spin-clockwise 1s infinite cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-
-        /* 4. Speaking */
-        .orb.speaking {
-            background: linear-gradient(135deg, #f472b6, #db2777);
-            box-shadow: 0 10px 60px rgba(219, 39, 119, 0.6), inset -10px -10px 30px var(--orb-shadow);
-            animation: snap 0.6s infinite alternate cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .speaking ~ .ring { border-color: rgba(219, 39, 119, 0.5); opacity: 1; }
-        .speaking ~ .ring-1 { animation: ripple 0.8s infinite ease-out; }
-        .speaking ~ .ring-2 { animation: ripple 1.2s infinite ease-out 0.1s; }
-        .speaking ~ .ring-3 { animation: ripple 1.6s infinite ease-out 0.2s; }
-
-        /* Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-8px) scale(0.98); }
-        }
-        @keyframes breathe-fast {
-            0%, 100% { transform: scale(1.05); }
-            50% { transform: scale(1.12); box-shadow: 0 0 70px rgba(16,185,129,0.7); }
-        }
-        @keyframes expand {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
-        @keyframes spin-clockwise { 100% { transform: rotate(360deg); } }
-        @keyframes spin-counter { 100% { transform: rotate(-360deg); } }
-        @keyframes snap {
-            0% { transform: scale(1.0); border-radius: 50%; }
-            100% { transform: scale(1.15); border-radius: 45%; }
-        }
-        @keyframes ripple {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            100% { transform: scale(1.3); opacity: 0; }
-        }
-
-        /* Typography */
-        .status {
-            font-size: 1.35rem;
-            font-weight: 500;
-            letter-spacing: -0.01em;
-            margin-bottom: 20px;
-            min-height: 32px;
-        }
-
-        .transcript {
-            font-size: 1.05rem;
-            color: var(--text-secondary);
-            font-weight: 300;
-            min-height: 48px;
+            width: 250px;
+            height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-style: italic;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            margin-bottom: 40px;
         }
 
-        .instructions {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            opacity: 0.6;
+        .orb {
+            width: var(--orb-size);
+            height: var(--orb-size);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #4f46e5);
+            box-shadow: 0 0 40px var(--orb-glow), inset -10px -10px 40px rgba(0,0,0,0.4);
+            cursor: pointer;
+            position: relative;
+            z-index: 5;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        .orb::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 50%);
+            mix-blend-mode: overlay;
+        }
+
+        /* Visualizer Rings */
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        /* States */
+        .orb.standby {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: float 4s infinite ease-in-out;
+            --orb-glow: transparent;
+        }
+
+        .orb.listening {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            --orb-glow: #0ea5e9;
+            box-shadow: 0 0 60px var(--orb-glow), inset -10px -10px 40px rgba(0,0,0,0.4);
+            animation: pulse-listen 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1.05);
+        }
+
+        .orb.processing {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            --orb-glow: #f59e0b;
+            box-shadow: 0 0 50px var(--orb-glow), inset -10px -10px 40px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+
+        .orb.speaking {
+            background: linear-gradient(135deg, #ec4899, #9333ea);
+            --orb-glow: #ec4899;
+            box-shadow: 0 0 70px var(--orb-glow), inset -10px -10px 40px rgba(0,0,0,0.4);
+            animation: waveform-simulate 0.8s infinite alternate cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Active Ring Animations */
+        .listening ~ .ring { border-color: rgba(14, 165, 233, 0.4); opacity: 1; }
+        .listening ~ .ring:nth-child(2) { width: 170px; height: 170px; animation: expand-fade 2s infinite ease-out; }
+        .listening ~ .ring:nth-child(3) { width: 210px; height: 210px; animation: expand-fade 2s infinite ease-out 0.4s; }
+        .listening ~ .ring:nth-child(4) { width: 250px; height: 250px; animation: expand-fade 2s infinite ease-out 0.8s; }
+
+        .processing ~ .ring { border: 2px solid transparent; border-top-color: rgba(245, 158, 11, 0.8); opacity: 1; }
+        .processing ~ .ring:nth-child(2) { width: 160px; height: 160px; animation: spin 1s infinite linear; }
+        .processing ~ .ring:nth-child(3) { width: 180px; height: 180px; animation: spin-reverse 1.5s infinite ease-in-out; border-top-color: transparent; border-bottom-color: rgba(245, 158, 11, 0.5); }
+
+        .speaking ~ .ring { border-color: rgba(236, 72, 153, 0.3); opacity: 1; }
+        .speaking ~ .ring:nth-child(2) { width: 180px; height: 180px; animation: bounce-ring 0.8s infinite alternate ease-in-out; }
+        .speaking ~ .ring:nth-child(3) { width: 220px; height: 220px; animation: bounce-ring 0.8s infinite alternate ease-in-out 0.2s; }
+
+        /* Typography */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4b5563;
+        }
+
+        .listening + .status-badge .status-dot { background: #0ea5e9; box-shadow: 0 0 10px #0ea5e9; }
+        .processing + .status-badge .status-dot { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+        .speaking + .status-badge .status-dot { background: #ec4899; box-shadow: 0 0 10px #ec4899; }
+
+        .transcript-container {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .transcript {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+            font-weight: 300;
+            line-height: 1.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .ambient-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-listen { 0% { box-shadow: 0 0 40px var(--orb-glow); transform: scale(1.05); } 50% { box-shadow: 0 0 80px var(--orb-glow); transform: scale(1.08); } 100% { box-shadow: 0 0 40px var(--orb-glow); transform: scale(1.05); } }
+        @keyframes waveform-simulate { 0% { border-radius: 50%; transform: scale(1); } 100% { border-radius: 40% 60% 50% 50%; transform: scale(1.1); } }
+        @keyframes expand-fade { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.4); opacity: 0; } }
+        @keyframes drift { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, -50px); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes bounce-ring { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 
     </style>
 </head>
 <body>
 
-    <div class="header-bar">
-        <button class="theme-toggle" id="themeBtn">🌙</button>
-    </div>
+    <div class="ambient-blur"></div>
 
     <div class="container">
-        <div class="orb-wrapper">
+        <div class="orb-wrapper" id="orbWrapper">
             <div class="orb standby" id="orb"></div>
-            <div class="ring ring-1"></div>
-            <div class="ring ring-2"></div>
-            <div class="ring ring-3"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
         </div>
-        <div class="status" id="status">Connecting to Core...</div>
-        <div class="transcript" id="transcript"></div>
-        <div class="instructions" id="inst">Tap orb to initialize system</div>
+        
+        <div class="status-badge" id="statusBadge">
+            <div class="status-dot"></div>
+            <span id="statusText">System Standby</span>
+        </div>
+
+        <div class="transcript-container">
+            <div class="transcript ambient-text" id="transcript">Tap core to initialize Phase 1 Dual-Gate Pipeline</div>
+        </div>
     </div>
 
     <script>
-        const themeBtn = document.getElementById('themeBtn');
         const orb = document.getElementById('orb');
-        const status = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
         const transcript = document.getElementById('transcript');
-        const inst = document.getElementById('inst');
         let ws;
         let isBooted = false;
-
-        themeBtn.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            themeBtn.innerText = newTheme === 'light' ? '🌤' : '🌙';
-        });
-        
-        // Audio playback state
         let audioCtx = null;
+        
+        // Output audio sync
         let nextPlayTime = 0;
+        let activeSources = 0;
         let isPlaying = false;
         let endOfStream = false;
+
+        function updateState(stateName, label) {
+            orb.className = `orb ${stateName}`;
+            statusText.innerText = label;
+        }
 
         function ensureAudioContext() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        let activeSources = 0;
         function schedulePCMChunk(arrayBuffer) {
             ensureAudioContext();
             
-            // Raw linear16 to Float32 conversion
             const int16Data = new Int16Array(arrayBuffer);
             const audioBuffer = audioCtx.createBuffer(1, int16Data.length, 24000);
             const channelData = audioBuffer.getChannelData(0);
@@ -285,9 +285,8 @@
             source.buffer = audioBuffer;
             source.connect(audioCtx.destination);
             
-            // Queue seamlessly
             if (nextPlayTime < audioCtx.currentTime) {
-                nextPlayTime = audioCtx.currentTime + 0.01; // small bump
+                nextPlayTime = audioCtx.currentTime + 0.01; 
             }
             
             source.start(nextPlayTime);
@@ -300,25 +299,23 @@
                 activeSources--;
                 if (activeSources === 0 && endOfStream) {
                     isPlaying = false;
-                    orb.className = 'orb listening';
-                    status.innerText = 'Listening...';
+                    updateState('listening', 'Listening');
                     ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
                 }
             };
         }
 
         function connectWebSocket() {
-            ws = new WebSocket('ws://localhost:8080/?format=browser');
+            // Added ?format=linear16 to enforce hardware bypassing WebM decoder in Node
+            ws = new WebSocket('ws://localhost:8080/?format=linear16');
 
             ws.onopen = () => {
-                status.innerText = 'System Ready';
-                transcript.innerText = 'Awaiting boot sequence';
+                updateState('standby', 'System Ready');
+                transcript.innerHTML = '<span class="ambient-text">Awaiting boot sequence</span>';
             };
 
             ws.onclose = () => {
-                status.innerText = 'Connection Lost';
-                orb.className = 'orb processing'; // reuse animation for error
-                orb.style.background = 'radial-gradient(circle at 30% 30%, #ef4444, #7f1d1d)';
+                updateState('processing', 'Connection Lost');
                 setTimeout(connectWebSocket, 3000);
             };
 
@@ -327,36 +324,33 @@
                     const parsed = JSON.parse(event.data);
                     
                     if (parsed.log) {
-                        if (parsed.log.includes('Hearing:')) {
-                            transcript.innerText = parsed.log.replace('👂 Hearing:', '').trim().replace(/"/g, '');
+                        if (parsed.log.includes('👂 Hearing:')) {
+                            transcript.innerHTML = parsed.log.replace('👂 Hearing:', '').trim().replace(/"/g, '');
+                            transcript.classList.remove('ambient-text');
                         } else {
-                            status.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
+                            if(parsed.log.includes('🗣️ [You]:')) return; // Ignore chat echoing unless needed
+                            statusText.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
                         }
                     }
                     if (parsed.action === 'QUEUE_AUDIO') {
-                        orb.className = 'orb processing'; // Will transition to playing
-                        status.innerText = 'Synthesizing...';
+                        updateState('processing', 'Synthesizing');
                         return;
                     }
                     if (parsed.action === 'TTS_STREAM_START') {
                         endOfStream = false;
-                        if (parsed.log) {
-                            status.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
-                        }
+                        if (parsed.log) statusText.innerText = parsed.log.replace(/🤖|🗣️|🔴|⚠️/g, '').trim();
                         return;
                     }
                     if (parsed.action === 'TTS_STREAM_CLOSED') {
                         endOfStream = true;
                         if (activeSources === 0) {
                             isPlaying = false;
-                            orb.className = 'orb listening';
-                            status.innerText = 'Listening...';
+                            updateState('listening', 'Listening');
                             ws.send(JSON.stringify({ action: "AUDIO_FINISHED" }));
                         }
                         return;
                     }
                     if (parsed.action === 'STOP_AUDIO') {
-                        // Purge playback 
                         if (audioCtx) {
                             audioCtx.close();
                             audioCtx = null;
@@ -365,19 +359,17 @@
                             endOfStream = false;
                         }
                         isPlaying = false;
-                        orb.className = 'orb listening';
-                        status.innerText = 'Listening...';
-                        transcript.innerText = 'Interrupted.';
+                        updateState('listening', 'Interrupted');
+                        transcript.innerHTML = '<span class="ambient-text">Pipeline redirected.</span>';
                         return;
+                    }
+                    if (parsed.action === 'SLEEP') {
+                        updateState('standby', 'System Sleeping');
                     }
                     return;
                 }
 
-                // AI TTS Audio PCM Chunk Arrived!
-                orb.className = 'orb speaking'; 
-                status.innerText = 'Speaking...';
-                
-                // Decode WebSockets blob to ArrayBuffer
+                updateState('speaking', 'Speaking');
                 const arrayBuffer = await event.data.arrayBuffer();
                 schedulePCMChunk(arrayBuffer);
             };
@@ -389,42 +381,75 @@
             if (isBooted) return;
             isBooted = true;
             
-            // Required for Apple / Webkit Audio policies
             ensureAudioContext();
-            
-            inst.innerText = 'Voice pipeline active';
+            transcript.innerHTML = '<span class="ambient-text">Authenticating pipeline...</span>';
             
             try {
+                // High-End Constraints 
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: { 
                         echoCancellation: true, 
                         noiseSuppression: true, 
-                        autoGainControl: true,
-                        sampleRate: 16000 
+                        autoGainControl: true
                     } 
                 });
                 
-                let options = { mimeType: 'audio/webm' };
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                    options = { mimeType: 'audio/mp4' }; 
-                }
-                const mediaRecorder = new MediaRecorder(stream, options);
-
-                mediaRecorder.ondataavailable = e => { 
-                    if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+                const micCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                const source = micCtx.createMediaStreamSource(stream);
+                
+                // Section 6.1 AudioWorklet for Native PCM Conversion
+                const workletCode = `
+                    class PCMProcessor extends AudioWorkletProcessor {
+                        constructor() {
+                            super();
+                            this.bufferSize = 512;
+                            this.buffer = new Float32Array(this.bufferSize);
+                            this.bytesWritten = 0;
+                        }
+                        process(inputs, outputs, parameters) {
+                            const input = inputs[0];
+                            if (input.length > 0) {
+                                const channelData = input[0];
+                                for (let i = 0; i < channelData.length; i++) {
+                                    this.buffer[this.bytesWritten++] = channelData[i];
+                                    if (this.bytesWritten >= this.bufferSize) {
+                                        const int16Buffer = new Int16Array(this.bufferSize);
+                                        for (let j = 0; j < this.bufferSize; j++) {
+                                            let s = Math.max(-1, Math.min(1, this.buffer[j]));
+                                            int16Buffer[j] = s < 0 ? s * 32768 : s * 32767;
+                                        }
+                                        this.port.postMessage(int16Buffer.buffer, [int16Buffer.buffer]);
+                                        this.bytesWritten = 0;
+                                    }
+                                }
+                            }
+                            return true;
+                        }
+                    }
+                    registerProcessor('pcm-processor', PCMProcessor);
+                `;
+                
+                const blob = new Blob([workletCode], { type: "application/javascript" });
+                const workletUrl = URL.createObjectURL(blob);
+                
+                await micCtx.audioWorklet.addModule(workletUrl);
+                const pcmNode = new AudioWorkletNode(micCtx, 'pcm-processor');
+                
+                pcmNode.port.onmessage = (e) => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
                         ws.send(e.data);
-                    } 
+                    }
                 };
                 
-                mediaRecorder.start(200); 
+                source.connect(pcmNode);
                 
-                orb.className = 'orb listening';
-                status.innerText = 'Listening...';
-                transcript.innerText = 'Speak naturally...';
+                updateState('listening', 'Microphone Active');
+                transcript.innerHTML = '<span class="ambient-text">Speak naturally. Dual-Gate active.</span>';
                 
             } catch (err) {
                 console.error('Mic error:', err);
-                status.innerText = 'Microphone Access Denied';
+                updateState('processing', 'Mic Error');
+                transcript.innerText = 'Microphone Access Denied';
             }
         });
     </script>

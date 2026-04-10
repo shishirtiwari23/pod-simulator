@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('⏳ Connecting to Gateway...');
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket('ws://localhost:8080/?format=linear16');
 
 let isRecording = false;
 let isProcessing = false;
