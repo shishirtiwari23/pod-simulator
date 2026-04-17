@@ -4,9 +4,11 @@ const readline = require('readline');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-console.log('⏳ Connecting to Gateway...');
-const ws = new WebSocket('ws://localhost:8080/?format=linear16');
+const targetUrl = process.env.BACKEND_URL || 'ws://localhost:8080/?format=linear16';
+console.log(`⏳ Connecting to Gateway at ${targetUrl}...`);
+const ws = new WebSocket(targetUrl);
 
 let isRecording = false;
 let isProcessing = false;

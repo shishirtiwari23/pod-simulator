@@ -260,7 +260,11 @@
 
         function updateState(stateName, label) {
             orb.className = `orb ${stateName}`;
-            statusText.innerText = label;
+            
+            // Environment Indicator
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const envLabel = isLocal ? 'DEV' : 'PROD';
+            statusText.innerText = `${label} [${envLabel}]`;
         }
 
         function ensureAudioContext() {
@@ -306,8 +310,13 @@
         }
 
         function connectWebSocket() {
-            // Added ?format=linear16 to enforce hardware bypassing WebM decoder in Node
-            ws = new WebSocket('ws://localhost:8080/?format=linear16');
+            // Dynamic Environment Resolution
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const RENDER_BACKEND_URL = 'wss://YOUR-RENDER-APP.onrender.com/?format=linear16';
+            const LOCAL_BACKEND_URL = 'ws://localhost:8080/?format=linear16';
+            
+            const backendEndpoint = isLocal ? LOCAL_BACKEND_URL : RENDER_BACKEND_URL;
+            ws = new WebSocket(backendEndpoint);
 
             ws.onopen = () => {
                 updateState('standby', 'System Ready');
