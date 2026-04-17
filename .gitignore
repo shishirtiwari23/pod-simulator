@@ -58,6 +58,11 @@ coverage/
 .tmp/
 .cache/
 
+# Ignore local backend testing scripts from Web deploy
+package.json
+package-lock.json
+client.js
+
 # -----------------------------
 # Submodules (IMPORTANT NOTE)
 # -----------------------------
